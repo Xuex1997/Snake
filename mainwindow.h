@@ -19,9 +19,16 @@
 #define TILE_SIZE 5
 #define SCORE_AREA_X 30
 #define SCORE_AREA_Y 30
+#define KILL_AREA_X 30
+#define KILL_AREA_Y 50
+
 #define FOOD_NUM 50
 #define AISNAKE_NUM 5
 #define WANRANGE 10
+
+QT_BEGIN_NAMESPACE
+namespace Ui { class MainWindow; }
+QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
 {
@@ -40,6 +47,7 @@ public:
     bool MSIsDied(Snake* s);
     void AIMove(Snake* s);
     void Snake2Food(int index, Snake* s);
+    void drawRank(QPainter* painter);
 
 private slots:
     void Snake_update();
@@ -63,8 +71,11 @@ private:
     QTimer *timer2;//AI定时器
     QString sDisplay;//开始、结束提示
     QString sScoreLabel;//得分标签
+    QString sKillLabel;//击杀数目
     int nSpeed;//移动速度
     bool accFlag;
+
+    Ui::MainWindow *ui;
 };
 
 #endif

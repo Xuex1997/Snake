@@ -9,11 +9,10 @@ int Distance(QPoint p1, QPoint p2)
 }
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),bIsRun(false),nSpeed(8),accFlag(false)
+    QMainWindow(parent),bIsRun(false),nSpeed(8),accFlag(false),ui(new Ui::MainWindow)
 {
     this->setAutoFillBackground(true);//设置父窗口背景可被覆盖填充
-    this->resize(GAME_AREA_WIDTH, GAME_AREA_HIGHT);
-    this->setWindowTitle("贪吃蛇");
+    ui->setupUi(this);
 }
 
 MainWindow::~MainWindow()
@@ -25,6 +24,35 @@ MainWindow::~MainWindow()
     timer2->stop();
     delete timer2;
     timer2 = nullptr;
+
+    delete ui;
+}
+
+void MainWindow::Init()
+{
+    sDisplay ="GAME START...";
+    sScoreLabel = "得分：";
+    sKillLabel = "击杀数：";
+    bIsRun = true;
+    bIsOver = false;
+
+    for(int i=0; i<FOOD_NUM; i++) {
+       CreateFood();
+    }
+
+    CreateSnake();
+    for(int i=0; i<AISNAKE_NUM; i++) {
+       CreateAISnake();
+    }
+
+    timer1 = new QTimer(this);
+    timer1->start(150);
+    connect(timer1,SIGNAL(timeout()),SLOT(Snake_update()));
+
+    timer2 = new QTimer(this);
+    timer2->start(150);
+    connect(timer2,SIGNAL(timeout()),SLOT(AI_update()));
+
 }
 
 void MainWindow::paintEvent(QPaintEvent *)
@@ -34,6 +62,7 @@ void MainWindow::paintEvent(QPaintEvent *)
     {
         Init();
     }
+
 
     qsrand(QTime(0,0,0).secsTo(QTime::currentTime()));
     //画背景
@@ -58,13 +87,19 @@ void MainWindow::paintEvent(QPaintEvent *)
     painter.setPen(Qt::black);
     painter.drawText(GAME_AREA_WIDTH/2,GAME_AREA_HIGHT/2,sDisplay);
 
-    //计分
+    //排行榜
+    drawRank(&painter);
+
+    //得分
     QFont font2("Courier",15);
     painter.setFont(font2);
     painter.setPen(Qt::gray);
     painter.setBrush(Qt::gray);
     painter.drawText(SCORE_AREA_X,SCORE_AREA_Y,sScoreLabel);
-    painter.drawText(SCORE_AREA_X+100,SCORE_AREA_Y,QString::number(my_snake.getScore()));
+    painter.drawText(SCORE_AREA_X+50,SCORE_AREA_Y,QString::number(my_snake.getScore()));
+    painter.drawText(KILL_AREA_X,KILL_AREA_Y,sKillLabel);
+    painter.drawText(KILL_AREA_X+50,KILL_AREA_Y,QString::number(my_snake.getKill()));
+
 
     //画蛇
     painter.setBrush(my_snake.getColor());
@@ -121,7 +156,6 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         accFlag=true;
     }
 }
-
 void MainWindow::keyReleaseEvent(QKeyEvent *event)
 {
     if(event->key() == Qt::Key_A && accFlag == true)
@@ -131,31 +165,7 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
         accFlag=false;
     }
 }
-void MainWindow::Init()
-{
-    sDisplay ="GAME START...";
-    sScoreLabel = "Score:";
-    bIsRun = true;
-    bIsOver = false;
 
-    for(int i=0; i<FOOD_NUM; i++) {
-       CreateFood();
-    }
-
-    CreateSnake();
-    for(int i=0; i<AISNAKE_NUM; i++) {
-       CreateAISnake();
-    }
-
-    timer1 = new QTimer(this);
-    timer1->start(150);
-    connect(timer1,SIGNAL(timeout()),SLOT(Snake_update()));
-
-    timer2 = new QTimer(this);
-    timer2->start(150);
-    connect(timer2,SIGNAL(timeout()),SLOT(AI_update()));
-
-}
 
 void MainWindow::AI_update()
 {
@@ -244,11 +254,14 @@ bool MainWindow::AIIsDied(Snake* s)
     {
         if(Distance(s->getHead(),my_snake.getBody()[i]) < 81)
         {
+            my_snake.setKill(my_snake.getKill()+1);
             return true;
         }
     }
+
     if(Distance(s->getHead(),my_snake.getHead()) < 81)
     {
+        my_snake.setKill(my_snake.getKill()+1);
         return true;
     }
     return false;
@@ -264,13 +277,9 @@ bool MainWindow::MSIsDied(Snake* s)
 
     for(int i=0; i<ai_snakes.size(); i++)
     {
-        if(Distance(s->getHead(),ai_snakes[i].getHead()) < 81)
-        {
-            return true;
-        }
         for(int j=0; j<ai_snakes[i].getBody().size(); j++)
         {
-            if(Distance(s->getHead(),ai_snakes[i].getBody()[i]) < 81)
+            if(Distance(s->getHead(),ai_snakes[i].getBody()[j]) < 81)
             {
                 return true;
             }
@@ -315,5 +324,10 @@ void MainWindow::AIMove(Snake *s)
         s->snakeMove(s->move(minDir.x(), minDir.y()));
         return;
     }
+
+}
+
+void MainWindow::drawRank(QPainter* painter)
+{
 
 }

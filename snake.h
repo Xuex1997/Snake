@@ -26,11 +26,12 @@ public:
     void setRadius(qreal radius);
     void setDirection(int dir);
     int getScore();
+    int getKill();
+    void setKill(int k);
 
     void addbody(int adds);
     void snakeMove(int dir);
     int move(int mouse_x, int mouse_y);
-
 
 private:
     QPoint snakehead;
@@ -38,6 +39,7 @@ private:
     QColor snakecolor;
     qreal snakeradius;
     int snakescore;
+    int snakeskills;
     int direction;//表示蛇头的方向
 };
 

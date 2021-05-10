@@ -13,7 +13,7 @@ Snake::~Snake()
 
 
 Snake::Snake(QPoint head, QColor color):
-    snakehead(head),snakecolor(color),snakeradius(INITAIL_RADIUS),snakescore(0), direction(0)
+    snakehead(head),snakecolor(color),snakeradius(INITAIL_RADIUS),snakescore(0), snakeskills(0), direction(0)
 {
     for(int i=0;i<5;i++)
     {
@@ -122,6 +122,15 @@ int Snake::getScore()
     return snakescore;
 }
 
+int Snake::getKill()
+{
+    return snakeskills;
+}
+
+void Snake::setKill(int k)
+{
+    snakeskills = k;
+}
 int Snake::move(int mouse_x, int mouse_y)
 {
     int static lastx=0;
